@@ -90,8 +90,16 @@ public class MaquinaDeCafe implements MaquinaDeEstados {
      * hay receta de ese producto
 	 */
 	public void prepararProducto(Producto seleccion) throws ProductoException {
-		//TODO implementar el metodo
-		for(Ingrediente )
+		if(recetas.get(seleccion)==null)
+			throw new ProductoException("No existe receta de este producto");
+		try {
+			for(Ingrediente i: recetas.get(seleccion).getIngredientes()) {
+				getRecipiente(i).extraer(recetas.get(seleccion).getCantidadDeIngrediente(i));
+			}
+		}
+		catch(CapacidadExcedidaException e1) {
+			throw new ProductoException("No se pueden extraer ingredientes para este producto");
+		}
 	}
 	
 	
@@ -106,8 +114,10 @@ public class MaquinaDeCafe implements MaquinaDeEstados {
 	 * caso contrario.
 	 */
 	public boolean hayIngredienteDisponible (Ingrediente ingrediente, int cantidadRequerida){
-		//TODO implementar el metodo
-		throw new IllegalStateException();//REMOVER ESTA LINEA
+		if(getRecipiente(ingrediente).getCantidadIngredienteDisponible() >= cantidadRequerida)
+			return true;
+		else 
+			return false;
 	}
 
 	
@@ -120,9 +130,14 @@ public class MaquinaDeCafe implements MaquinaDeEstados {
 	 * ingrediente.
 	 */
 	public Recipiente getRecipiente (Ingrediente ingrediente){
-		//TODO implementar el metodo
-		throw new IllegalStateException();//REMOVER ESTA LINEA
-	}
+		for(Recipiente r: recipientes) 
+			if(r.getTipoIngredienteAlmacenado().equals(ingrediente)) 
+					return r;
+		
+		
+		return null;
+		
+}
 	
 	/**
 	 * Agrega una receta para un producto de la maquina de
@@ -133,7 +148,12 @@ public class MaquinaDeCafe implements MaquinaDeEstados {
 	 * @throws IllegalStateException si la maquina no esta en modo MANTENIMIENTO
 	 */
 	public void agregarReceta (Receta r, Producto p){
-		//TODO implementar el metodo
+		if(estado.equals(estado.MANTENIMIENTO)) {
+			recetas.put(p, r);
+		}
+		else {
+			throw new IllegalStateException("Colocar en MANTENIMIENTO");
+		}
 	}
 	
 	/**
@@ -143,7 +163,13 @@ public class MaquinaDeCafe implements MaquinaDeEstados {
 	 * @throws IllegalStateException si la maquina no esta en modo MANTENIMIENTO
 	 */
 	public void limpiarRecetas (){
-		//TODO implementar el metodo
+		if(estado.equals(estado.MANTENIMIENTO)) {
+			totalProductosServidos=0;
+			recetas.clear();
+		}
+		else {
+			throw new IllegalStateException("Colocar en MANTENIMIENTO");
+		}
 	}
 
 	/**
@@ -154,7 +180,7 @@ public class MaquinaDeCafe implements MaquinaDeEstados {
 	 * @throws IllegalStateException si la maquina no esta lista
 	 */
 	public void setSeleccion(Producto seleccion) {
-		//TODO implementar el metodo
+		this.seleccion = seleccion;
 	}
 
     /* Metodos de la interface */
@@ -166,7 +192,6 @@ public class MaquinaDeCafe implements MaquinaDeEstados {
 	
 	@Override
 	public void operar() {
-		//TODO implementar el metodo
 		if(estado == estado.LISTO)
 		estado = estado.OPERANDO;
 		else {
